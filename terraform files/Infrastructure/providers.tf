@@ -9,6 +9,15 @@ provider "aws" {
   secret_key = "K8JNPtn9jQVhTAtKy71IUAWJTBGfYgiArvUW77fD" 
 }
 
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
+}
+
 # Using these data sources allows the configuration to be
 # generic for any region.
 data "aws_region" "current" {}
