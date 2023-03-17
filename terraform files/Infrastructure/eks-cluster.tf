@@ -28,7 +28,6 @@ resource "aws_iam_role_policy_attachment" "Altschool-cluster-AmazonEKSClusterPol
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.Altschool-cluster.name
 }
-
 resource "aws_iam_role_policy_attachment" "Altschool-cluster-AmazonEKSServicePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
   role       = aws_iam_role.Altschool-cluster.name
@@ -38,7 +37,7 @@ resource "aws_security_group" "Altschool-cluster" {
   name        = "terraform-eks-Altschool-cluster"
   description = "Cluster communication with worker nodes"
   vpc_id      = aws_vpc.Altschool.id
-  
+
   ingress {
     from_port = 0
     to_port = 65535
@@ -82,4 +81,3 @@ resource "aws_eks_cluster" "Altschool" {
     aws_iam_role_policy_attachment.Altschool-cluster-AmazonEKSServicePolicy,
   ]
 }
-
