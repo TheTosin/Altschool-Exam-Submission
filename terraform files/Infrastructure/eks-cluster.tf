@@ -36,7 +36,7 @@ resource "aws_iam_role_policy_attachment" "Altschool-cluster-AmazonEKSServicePol
 resource "aws_security_group" "Altschool-cluster" {
   name        = "terraform-eks-Altschool-cluster"
   description = "Cluster communication with worker nodes"
-  vpc_id      = aws_vpc.Altschool.id
+  vpc_id      = aws_vpc.vpc.id
 
   ingress {
     from_port = 0
@@ -72,8 +72,8 @@ resource "aws_eks_cluster" "Altschool" {
   role_arn = aws_iam_role.Altschool-cluster.arn
 
   vpc_config {
-    security_group_ids = [aws_security_group.Altschool-cluster.id]
-    subnet_ids         = aws_subnet.Altschool[*].id
+    security_group_ids = [aws_security_group.eks-security-group.id]
+    subnet_ids = [aws_subnet.pub-sub1.id, aws_subnet.pub-sub2.id, aws_subnet.priv-sub1.id, aws_subnet.priv-sub2.id]
   }
 
   depends_on = [
