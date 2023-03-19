@@ -42,12 +42,12 @@ resource "aws_eks_node_group" "Altschool-node" {
   cluster_name    = aws_eks_cluster.Altschool.name
   node_group_name = "Altschool-node"
   node_role_arn   = aws_iam_role.Altschool-node.arn
-  subnet_ids      = aws_subnet.Altschool[*].id
-  instance_types = ["t2.xlarge"]
-  
+  subnet_ids      = [aws_subnet.pub-sub1.id, aws_subnet.pub-sub2.id, aws_subnet.priv-sub1.id, aws_subnet.priv-sub2.id]
+  instance_types = ["t3.medium"]
+
   scaling_config {
-    desired_size = 1
-    max_size     = 1
+    desired_size = 3
+    max_size     = 3
     min_size     = 1
   }
 
@@ -58,4 +58,3 @@ resource "aws_eks_node_group" "Altschool-node" {
     aws_eks_cluster.Altschool,
   ]
 }
-
