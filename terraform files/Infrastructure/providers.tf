@@ -1,11 +1,8 @@
-#
-# Provider Configuration
-#
+  GNU nano 4.8                                                                     providers.tf                                                                               # AWS provider
 
 provider "aws" {
   region     = "us-east-1"
-   access_key = "AKIA4YJOBHOEUUN6OPZQ"
-   secret_key = "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"
+
 }
 
 # Kubectl Terraform provider
@@ -34,13 +31,13 @@ terraform {
 # Kubernetes provider configuration
 
 provider "kubernetes" {
-  host                   = aws_Altschool_cluster.Altschool-cluster.endpoint
-  cluster_ca_certificate = base64decode(aws_Altschool_cluster.Altschool-cluster.certificate_authority[0].data)
+  host                   = aws_eks_cluster.eks-cluster.endpoint
+  cluster_ca_certificate = base64decode(aws_eks_cluster.eks-cluster.certificate_authority[0].data)
   version          = "2.16.1"
-
+  
   exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    args        = ["eks", "get-token", "--cluster-name", aws_Altschool_cluster.Altschool-cluster.name]
+    api_version = "client.authentication.k8s.io/v1alpha1"
+    args        = ["eks", "get-token", "--cluster-name", aws_eks_cluster.eks-cluster.name]
     command     = "aws"
   }
 }
@@ -49,10 +46,10 @@ provider "kubernetes" {
 
 provider "kubectl" {
   host                   = aws_eks_cluster.eks-cluster.endpoint
-  cluster_ca_certificate = base64decode(aws_Altschool_cluster.Altschool-cluster.certificate_authority[0].data)
+  cluster_ca_certificate = base64decode(aws_eks_cluster.eks-cluster.certificate_authority[0].data)
   exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    args        = ["eks", "get-token", "--cluster-name", aws_Altschool_cluster.Altschool-cluster.name]
+    api_version = "client.authentication.k8s.io/v1alpha1"
+    args        = ["eks", "get-token", "--cluster-name", aws_eks_cluster.eks-cluster.name]
     command     = "aws"
   }
 }
@@ -68,4 +65,3 @@ data "aws_availability_zones" "available" {}
 # to open EC2 Security Group access to the Kubernetes cluster.
 # See workstation-external-ip.tf for additional information.
 provider "http" {}
-
