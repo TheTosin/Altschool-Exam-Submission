@@ -30,29 +30,22 @@ terraform {
    }
  }
 
-# Using these data sources allows the configuration to be
-# generic for any region.
-
-data "aws_region" "current" {}
-
-data "aws_availability_zones" "available" {}
-
 # Kubernetes provider configuration
 
 # Retrieve eks cluster using data source
 
-data "aws_eks_cluster" "Altschool-cluster" {
-  name = "Altschool-cluster"
+data "aws_eks_cluster" "eks-cluster" {
+  name = "eks-cluster"
 }
 
 provider "kubernetes" {
-  host                   = data.aws_eks_cluster.Altschool-cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.Altschool-cluster.certificate_authority[0].data)
+  host                   = data.aws_eks_cluster.eks-cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority[0].data)
   version          = "2.16.1"
 
   exec {
     api_version = "client.authentication.k8s.io/v1alpha1"
-    args        = ["eks", "get-token", "--cluster-name", data.aws_eks_cluster.Altschool-cluster.name]
+    args        = ["eks", "get-token", "--cluster-name", data.aws_eks_cluster.eks-cluster.name]
     command     = "aws"
   }
 }
@@ -60,17 +53,19 @@ provider "kubernetes" {
 # Kubectl provider configuration
 
 provider "kubectl" {
-  host                   = data.aws_eks_cluster.Altschool-cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.Altschool-cluster.certificate_authority[0].data)
+  host                   = data.aws_eks_cluster.eks-cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority[0].data)
   exec {
     api_version = "client.authentication.k8s.io/v1alpha1"
-    args        = ["eks", "get-token", "--cluster-name", data.aws_eks_cluster.Altschool-cluster.name]
+    args        = ["eks", "get-token", "--cluster-name", data.aws_eks_cluster.eks-cluster.name]
     command     = "aws"
   }
 }
 
-# Not required: currently used in conjuction with using
-# icanhazip.com to determine local workstation external IP
-# to open EC2 Security Group access to the Kubernetes cluster.
-# See workstation-external-ip.tf for additional information.
-provider "http" {}
+# Using these data sources allows the configuration to be
+# generic for any region.
+
+data "aws_region" "current" {}
+
+data "aws_availability_zones" "available" {}
+
