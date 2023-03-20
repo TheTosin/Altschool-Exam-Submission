@@ -16,4 +16,4 @@ The Terraform folder consists of Infrastructure, Deployment and monitoring files
 
 **The monitoring folder** contains the scripts used to deploy prometheus and grafana to the cluster used for observing and monnitoring the uptime and performance of both applications.
 
-**The userprofile** folder consists of dockercompose.yaml file, dockerfile and the app folder consisting of the index.html, server.js, package.json and package
+**The userprofile** folder consists of dockercompose.yaml file, dockerfile and the app folder consisting of the index.html, server.js, package.json and packagelock.json files, which are all scripts for the deployment of a simple user profile application.
