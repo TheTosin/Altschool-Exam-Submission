@@ -1,24 +1,3 @@
-  GNU nano 4.8                                           eksdomain.tf                                                      resource "kubernetes_service" "kube-service-userprofile" {
-  metadata {
-    name = "kube-service-userprofile"
-  }
-
-  spec {
-    selector = {
-      app = "userprofile"
-    }
-
-    port {
-      name       = "http"
-      port       = 80
-      target_port = "http"
-    }
-
-    type = "LoadBalancer"
-  }
-}
-
-
 # Route 53 and sub-domain name setup
 
 resource "aws_route53_zone" "userprofile-domain-name" {
