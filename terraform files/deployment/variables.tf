@@ -1,5 +1,5 @@
 variable "cluster" {
-  default = "Altschool-cluster"
+  default = "eks-cluster"
 }
 
 variable "app" {
