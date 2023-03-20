@@ -1,75 +1,15 @@
-#
-# EKS Cluster Resources
-#  * IAM Role to allow EKS service to manage other AWS services
-#  * EC2 Security Group to allow networking traffic with EKS cluster
-#  * EKS Cluster
-#
+  GNU nano 4.8                                                                    eks-cluster.tf                                                                              # CloudWatch Log group for EKS cluster
 
-resource "aws_iam_role" "Altschool-cluster" {
-  name = "terraform-eks-Altschool-cluster"
-
-  assume_role_policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "eks.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-POLICY
+resource "aws_cloudwatch_log_group" "eks-cluster-logs" {
+  name              = "/aws/eks/eks-cluster/cluster"
+  retention_in_days = 7
 }
 
-resource "aws_iam_role_policy_attachment" "Altschool-cluster-AmazonEKSClusterPolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.Altschool-cluster.name
-}
-resource "aws_iam_role_policy_attachment" "Altschool-cluster-AmazonEKSServicePolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-  role       = aws_iam_role.Altschool-cluster.name
-}
+# Create EKS Cluster
 
-resource "aws_security_group" "Altschool-cluster" {
-  name        = "terraform-eks-Altschool-cluster"
-  description = "Cluster communication with worker nodes"
-  vpc_id      = aws_vpc.vpc.id
-
-  ingress {
-    from_port = 0
-    to_port = 65535
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "terraform-eks-Altschool"
-  }
-}
-
-resource "aws_security_group_rule" "Altschool-cluster-ingress-workstation-https" {
-  cidr_blocks       = [local.workstation-external-cidr]
-  description       = "Allow workstation to communicate with the cluster API Server"
-  from_port         = 443
-  protocol          = "tcp"
-  security_group_id = aws_security_group.Altschool-cluster.id
-  to_port           = 443
-  type              = "ingress"
-}
-
-resource "aws_eks_cluster" "Altschool" {
-  name     = var.cluster_name
-  role_arn = aws_iam_role.Altschool-cluster.arn
+resource "aws_eks_cluster" "eks-cluster" {
+  name     = "eks-cluster"
+  role_arn = aws_iam_role.eks-cluster-role.arn
 
   vpc_config {
     security_group_ids = [aws_security_group.eks-security-group.id]
@@ -77,7 +17,40 @@ resource "aws_eks_cluster" "Altschool" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.Altschool-cluster-AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.Altschool-cluster-AmazonEKSServicePolicy,
+    aws_iam_role_policy_attachment.eks-cluster-AmazonEKSClusterPolicy,
+    aws_iam_role_policy_attachment.eks-cluster-AmazonEKSVPCResourceController,
+    aws_cloudwatch_log_group.eks-cluster-logs,
   ]
+
+  enabled_cluster_log_types = ["api", "audit"]
+}
+
+# Create EKS Cluster node group
+
+resource "aws_eks_node_group" "eks-node-group" {
+  cluster_name    = aws_eks_cluster.eks-cluster.name
+  node_group_name = "eks-node-group"
+  node_role_arn   = aws_iam_role.eks-nodes-role.arn
+  instance_types = ["t2.xlarge"]
+  subnet_ids      = [aws_subnet.pub-sub1.id, aws_subnet.pub-sub2.id, aws_subnet.priv-sub1.id, aws_subnet.priv-sub2.id]
+
+  scaling_config {
+    desired_size = 3
+    max_size     = 3
+    min_size     = 1
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks-node-AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.eks-node-AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.eks-node-AmazonEC2ContainerRegistryReadOnly,
+  ]
+}
+
+output "endpoint" {
+  value = aws_eks_cluster.eks-cluster.endpoint
+}
+
+output "kubeconfig-certificate-authority-data" {
+  value = aws_eks_cluster.eks-cluster.certificate_authority[0].data
 }
