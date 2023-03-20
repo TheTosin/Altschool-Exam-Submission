@@ -15,7 +15,7 @@ data "aws_elb_hosted_zone_id" "elb_zone_id" {
   ]
 }
 
-# DNS record for portfolio
+# DNS record for userprofile
 
 resource "aws_route53_record" "userprofile-record" {
   zone_id = aws_route53_zone.userprofile-domain-name.zone_id
@@ -23,7 +23,7 @@ resource "aws_route53_record" "userprofile-record" {
   type    = "A"
 
   alias {
-    name                   = kubernetes_service.kube-service-portfolio.status.0.load_balancer.0.ingress.0.hostname
+    name                   = kubernetes_service.kube-service-userprofile.status.0.load_balancer.0.ingress.0.hostname
     zone_id                = data.aws_elb_hosted_zone_id.elb_zone_id.id
     evaluate_target_health = true
   }
