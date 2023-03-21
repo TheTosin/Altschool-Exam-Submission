@@ -1,4 +1,4 @@
-  GNU nano 4.8                                                                    eks-cluster.tf                                                                              # CloudWatch Log group for EKS cluster
+# CloudWatch Log group for EKS cluster
 
 resource "aws_cloudwatch_log_group" "eks-cluster-logs" {
   name              = "/aws/eks/eks-cluster/cluster"
